@@ -1,0 +1,205 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+  <title>My Personal Forex AI</title>
+
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+      font-family: Arial, sans-serif;
+    }
+
+    body {
+      background: #0b1120;
+      color: white;
+    }
+
+    .sidebar {
+      position: fixed;
+      width: 240px;
+      height: 100vh;
+      background: #111827;
+      padding: 25px;
+    }
+
+    .logo {
+      font-size: 22px;
+      font-weight: bold;
+      color: #22c55e;
+      margin-bottom: 40px;
+    }
+
+    .menu a {
+      display: block;
+      color: #cbd5e1;
+      text-decoration: none;
+      padding: 14px;
+      margin-bottom: 8px;
+      border-radius: 8px;
+    }
+
+    .menu a:hover {
+      background: #1f2937;
+      color: white;
+    }
+
+    .main {
+      margin-left: 240px;
+      padding: 35px;
+    }
+
+    h1 {
+      margin-bottom: 10px;
+    }
+
+    .subtitle {
+      color: #94a3b8;
+      margin-bottom: 30px;
+    }
+
+    .grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+      gap: 20px;
+    }
+
+    .card {
+      background: #111827;
+      padding: 22px;
+      border-radius: 12px;
+      border: 1px solid #1f2937;
+    }
+
+    .card h3 {
+      color: #94a3b8;
+      font-size: 14px;
+      margin-bottom: 15px;
+    }
+
+    .number {
+      font-size: 28px;
+      font-weight: bold;
+      color: #22c55e;
+    }
+
+    .section {
+      margin-top: 30px;
+    }
+
+    .market {
+      display: flex;
+      justify-content: space-between;
+      padding: 16px;
+      background: #111827;
+      margin-top: 10px;
+      border-radius: 8px;
+    }
+
+    .watch {
+      color: #facc15;
+    }
+
+    .no-trade {
+      color: #ef4444;
+    }
+
+    .analyzing {
+      color: #22c55e;
+    }
+
+  </style>
+</head>
+
+<body>
+
+  <div class="sidebar">
+
+    <div class="logo">
+      🧠 FOREX AI
+    </div>
+
+    <div class="menu">
+      <a href="#">🏠 Dashboard</a>
+      <a href="#">🧠 AI Brain</a>
+      <a href="#">📊 Market Watch</a>
+      <a href="#">🎯 Signal Center</a>
+      <a href="#">🛡️ Risk Manager</a>
+      <a href="#">💰 Account</a>
+      <a href="#">📈 Trading Journal</a>
+      <a href="#">📚 Strategies</a>
+      <a href="#">🔬 Research Lab</a>
+      <a href="#">⚙️ Settings</a>
+    </div>
+
+  </div>
+
+
+  <div class="main">
+
+    <h1>Welcome, Master 👋</h1>
+
+    <p class="subtitle">
+      My Personal Forex AI — Private Trading Intelligence System
+    </p>
+
+
+    <div class="grid">
+
+      <div class="card">
+        <h3>📊 MARKETS MONITORING</h3>
+        <div class="number">12</div>
+      </div>
+
+      <div class="card">
+        <h3>🟢 STRONG SETUPS</h3>
+        <div class="number">0</div>
+      </div>
+
+      <div class="card">
+        <h3>🟡 WATCHING</h3>
+        <div class="number">0</div>
+      </div>
+
+      <div class="card">
+        <h3>🔴 NO TRADE</h3>
+        <div class="number">0</div>
+      </div>
+
+    </div>
+
+
+    <div class="section">
+
+      <h2>📊 Market Watch</h2>
+
+      <div class="market">
+        <span>EUR/USD</span>
+        <span class="watch">🟡 WATCHING</span>
+      </div>
+
+      <div class="market">
+        <span>GBP/USD</span>
+        <span class="no-trade">🔴 NO TRADE</span>
+      </div>
+
+      <div class="market">
+        <span>XAU/USD</span>
+        <span class="analyzing">🟢 ANALYZING</span>
+      </div>
+
+      <div class="market">
+        <span>USD/JPY</span>
+        <span class="watch">🟡 WATCHING</span>
+      </div>
+
+    </div>
+
+  </div>
+
+</body>
+</html>
