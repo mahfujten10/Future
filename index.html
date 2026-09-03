@@ -1,0 +1,1523 @@
+<!DOCTYPE html>
+<html lang="bn">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>MyTradingBrain - Personal Trading Knowledge</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        :root {
+            --bg: #0a0a0a;
+            --bg-card: rgba(20, 20, 25, 0.8);
+            --text: #e0e0e0;
+            --text-dim: #888;
+            --profit: #00ff88;
+            --loss: #ff4444;
+            --accent: #00d4ff;
+            --border: rgba(255,255,255,0.1);
+        }
+
+        body {
+            font-family: 'Segoe UI', system-ui, -apple-system, sans-serif;
+            background: var(--bg);
+            color: var(--text);
+            min-height: 100vh;
+            overflow-x: hidden;
+        }
+
+        /* Animated background particles */
+        .particles {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            pointer-events: none;
+            z-index: 0;
+            overflow: hidden;
+        }
+
+        .particle {
+            position: absolute;
+            width: 4px;
+            height: 4px;
+            background: var(--profit);
+            border-radius: 50%;
+            opacity: 0.3;
+            animation: float 15s infinite;
+        }
+
+        @keyframes float {
+            0%, 100% { transform: translateY(100vh) rotate(0deg); opacity: 0; }
+            10% { opacity: 0.3; }
+            90% { opacity: 0.3; }
+            100% { transform: translateY(-100vh) rotate(720deg); opacity: 0; }
+        }
+
+        /* Header */
+        .header {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            z-index: 100;
+            background: rgba(10,10,10,0.9);
+            backdrop-filter: blur(20px);
+            border-bottom: 1px solid var(--border);
+            padding: 15px 20px;
+        }
+
+        .header-content {
+            max-width: 1200px;
+            margin: 0 auto;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .logo {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            font-size: 1.5rem;
+            font-weight: 700;
+        }
+
+        .logo-icon {
+            width: 40px;
+            height: 40px;
+            background: linear-gradient(135deg, var(--profit), var(--accent));
+            border-radius: 10px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.5rem;
+        }
+
+        .logo-text {
+            background: linear-gradient(90deg, var(--profit), var(--accent));
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+
+        .datetime {
+            text-align: right;
+            font-size: 0.85rem;
+            color: var(--text-dim);
+        }
+
+        .time {
+            font-size: 1.2rem;
+            color: var(--profit);
+            font-weight: 600;
+            text-shadow: 0 0 10px rgba(0,255,136,0.3);
+        }
+
+        /* Navigation */
+        .nav {
+            position: fixed;
+            bottom: 0;
+            left: 0;
+            right: 0;
+            z-index: 100;
+            background: rgba(10,10,10,0.95);
+            backdrop-filter: blur(20px);
+            border-top: 1px solid var(--border);
+            padding: 10px;
+        }
+
+        .nav-items {
+            display: flex;
+            justify-content: space-around;
+            max-width: 600px;
+            margin: 0 auto;
+        }
+
+        .nav-item {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 4px;
+            padding: 8px 16px;
+            border-radius: 12px;
+            cursor: pointer;
+            transition: all 0.3s;
+            color: var(--text-dim);
+            font-size: 0.75rem;
+            border: none;
+            background: none;
+            font-family: inherit;
+        }
+
+        .nav-item:hover, .nav-item.active {
+            color: var(--profit);
+            background: rgba(0,255,136,0.1);
+        }
+
+        .nav-item.active {
+            box-shadow: 0 0 20px rgba(0,255,136,0.2);
+        }
+
+        .nav-icon {
+            font-size: 1.5rem;
+        }
+
+        /* Main Content */
+        .main {
+            padding: 90px 20px 100px;
+            max-width: 1200px;
+            margin: 0 auto;
+            position: relative;
+            z-index: 1;
+        }
+
+        .page {
+            display: none;
+            animation: fadeIn 0.4s ease;
+        }
+
+        .page.active {
+            display: block;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(20px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        .page-title {
+            font-size: 2rem;
+            margin-bottom: 5px;
+            background: linear-gradient(90deg, var(--text), var(--accent));
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+
+        .page-subtitle {
+            color: var(--text-dim);
+            margin-bottom: 25px;
+            font-size: 0.95rem;
+        }
+
+        /* Cards */
+        .card {
+            background: var(--bg-card);
+            border: 1px solid var(--border);
+            border-radius: 16px;
+            padding: 20px;
+            margin-bottom: 15px;
+            backdrop-filter: blur(10px);
+            transition: all 0.3s;
+        }
+
+        .card:hover {
+            border-color: rgba(0,255,136,0.3);
+            box-shadow: 0 8px 32px rgba(0,255,136,0.1);
+        }
+
+        .card-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 15px;
+        }
+
+        .card-title {
+            font-size: 1.1rem;
+            font-weight: 600;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        /* Stats Grid */
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 15px;
+            margin-bottom: 20px;
+        }
+
+        .stat-card {
+            background: var(--bg-card);
+            border: 1px solid var(--border);
+            border-radius: 16px;
+            padding: 20px;
+            text-align: center;
+            transition: all 0.3s;
+        }
+
+        .stat-card:hover {
+            transform: translateY(-5px);
+            border-color: var(--profit);
+        }
+
+        .stat-value {
+            font-size: 2rem;
+            font-weight: 700;
+            margin: 10px 0;
+        }
+
+        .stat-value.profit {
+            color: var(--profit);
+            text-shadow: 0 0 20px rgba(0,255,136,0.3);
+        }
+
+        .stat-value.loss {
+            color: var(--loss);
+            text-shadow: 0 0 20px rgba(255,68,68,0.3);
+        }
+
+        .stat-label {
+            color: var(--text-dim);
+            font-size: 0.85rem;
+        }
+
+        /* Checklist */
+        .checklist-item {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            padding: 12px;
+            border-radius: 10px;
+            margin-bottom: 8px;
+            transition: all 0.3s;
+            cursor: pointer;
+        }
+
+        .checklist-item:hover {
+            background: rgba(255,255,255,0.05);
+        }
+
+        .checklist-item.checked {
+            opacity: 0.5;
+        }
+
+        .checklist-item.checked .check-text {
+            text-decoration: line-through;
+            color: var(--text-dim);
+        }
+
+        .checkbox {
+            width: 24px;
+            height: 24px;
+            border: 2px solid var(--border);
+            border-radius: 6px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: all 0.3s;
+            flex-shrink: 0;
+        }
+
+        .checklist-item.checked .checkbox {
+            background: var(--profit);
+            border-color: var(--profit);
+            box-shadow: 0 0 10px rgba(0,255,136,0.3);
+        }
+
+        .check-text {
+            font-size: 0.95rem;
+        }
+
+        .progress-bar {
+            height: 6px;
+            background: rgba(255,255,255,0.1);
+            border-radius: 3px;
+            margin-top: 15px;
+            overflow: hidden;
+        }
+
+        .progress-fill {
+            height: 100%;
+            background: linear-gradient(90deg, var(--profit), var(--accent));
+            border-radius: 3px;
+            transition: width 0.5s ease;
+            box-shadow: 0 0 10px rgba(0,255,136,0.3);
+        }
+
+        /* Strategy Cards */
+        .strategy-grid {
+            display: grid;
+            gap: 15px;
+        }
+
+        .strategy-card {
+            background: var(--bg-card);
+            border: 1px solid var(--border);
+            border-radius: 16px;
+            padding: 20px;
+            transition: all 0.3s;
+            cursor: pointer;
+        }
+
+        .strategy-card:hover {
+            border-color: var(--accent);
+            transform: translateX(5px);
+        }
+
+        .strategy-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: start;
+            margin-bottom: 10px;
+        }
+
+        .strategy-name {
+            font-size: 1.1rem;
+            font-weight: 600;
+        }
+
+        .win-badge {
+            background: rgba(0,255,136,0.15);
+            color: var(--profit);
+            padding: 4px 12px;
+            border-radius: 20px;
+            font-size: 0.8rem;
+            font-weight: 600;
+        }
+
+        .strategy-meta {
+            display: flex;
+            gap: 15px;
+            color: var(--text-dim);
+            font-size: 0.85rem;
+            margin-bottom: 10px;
+        }
+
+        .strategy-desc {
+            color: var(--text-dim);
+            font-size: 0.9rem;
+            line-height: 1.5;
+        }
+
+        /* Forms */
+        .form-group {
+            margin-bottom: 15px;
+        }
+
+        .form-label {
+            display: block;
+            margin-bottom: 8px;
+            font-size: 0.9rem;
+            color: var(--text-dim);
+        }
+
+        .form-input, .form-select, .form-textarea {
+            width: 100%;
+            padding: 12px 16px;
+            background: rgba(255,255,255,0.05);
+            border: 1px solid var(--border);
+            border-radius: 10px;
+            color: var(--text);
+            font-size: 1rem;
+            font-family: inherit;
+            transition: all 0.3s;
+        }
+
+        .form-input:focus, .form-select:focus, .form-textarea:focus {
+            outline: none;
+            border-color: var(--profit);
+            box-shadow: 0 0 15px rgba(0,255,136,0.1);
+        }
+
+        .form-textarea {
+            min-height: 120px;
+            resize: vertical;
+        }
+
+        /* Buttons */
+        .btn {
+            padding: 12px 24px;
+            border-radius: 10px;
+            border: none;
+            font-size: 1rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s;
+            font-family: inherit;
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .btn-primary {
+            background: linear-gradient(135deg, var(--profit), var(--accent));
+            color: var(--bg);
+            box-shadow: 0 4px 20px rgba(0,255,136,0.3);
+        }
+
+        .btn-primary:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 30px rgba(0,255,136,0.4);
+        }
+
+        .btn-danger {
+            background: linear-gradient(135deg, var(--loss), #ff6b6b);
+            color: white;
+        }
+
+        .btn-outline {
+            background: transparent;
+            border: 1px solid var(--border);
+            color: var(--text);
+        }
+
+        .btn-outline:hover {
+            border-color: var(--profit);
+            color: var(--profit);
+        }
+
+        /* Trade List */
+        .trade-list {
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+        }
+
+        .trade-item {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 15px;
+            background: rgba(255,255,255,0.03);
+            border-radius: 12px;
+            border-left: 3px solid transparent;
+            transition: all 0.3s;
+        }
+
+        .trade-item.win {
+            border-left-color: var(--profit);
+        }
+
+        .trade-item.loss {
+            border-left-color: var(--loss);
+        }
+
+        .trade-info {
+            flex: 1;
+        }
+
+        .trade-pair {
+            font-weight: 600;
+            margin-bottom: 4px;
+        }
+
+        .trade-date {
+            font-size: 0.8rem;
+            color: var(--text-dim);
+        }
+
+        .trade-result {
+            text-align: right;
+        }
+
+        .trade-pnl {
+            font-size: 1.2rem;
+            font-weight: 700;
+        }
+
+        .trade-pnl.win {
+            color: var(--profit);
+        }
+
+        .trade-pnl.loss {
+            color: var(--loss);
+        }
+
+        /* Notes */
+        .note-card {
+            background: var(--bg-card);
+            border: 1px solid var(--border);
+            border-radius: 12px;
+            padding: 15px;
+            margin-bottom: 10px;
+            transition: all 0.3s;
+        }
+
+        .note-card:hover {
+            border-color: var(--accent);
+        }
+
+        .note-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 10px;
+        }
+
+        .note-title {
+            font-weight: 600;
+        }
+
+        .note-tag {
+            background: rgba(0,212,255,0.15);
+            color: var(--accent);
+            padding: 2px 10px;
+            border-radius: 20px;
+            font-size: 0.75rem;
+        }
+
+        .note-content {
+            color: var(--text-dim);
+            font-size: 0.9rem;
+            line-height: 1.5;
+        }
+
+        .note-date {
+            font-size: 0.8rem;
+            color: var(--text-dim);
+            margin-top: 10px;
+        }
+
+        /* Mood Tracker */
+        .mood-grid {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 10px;
+            margin-bottom: 20px;
+        }
+
+        .mood-btn {
+            padding: 15px;
+            border-radius: 12px;
+            border: 1px solid var(--border);
+            background: var(--bg-card);
+            color: var(--text);
+            font-size: 1.5rem;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+
+        .mood-btn:hover, .mood-btn.active {
+            transform: scale(1.1);
+            border-color: var(--accent);
+            box-shadow: 0 0 20px rgba(0,212,255,0.2);
+        }
+
+        /* Breathing Exercise */
+        .breathing-circle {
+            width: 150px;
+            height: 150px;
+            border-radius: 50%;
+            border: 3px solid var(--profit);
+            margin: 30px auto;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.2rem;
+            font-weight: 600;
+            animation: breathe 8s infinite;
+            box-shadow: 0 0 30px rgba(0,255,136,0.2);
+        }
+
+        @keyframes breathe {
+            0%, 100% { transform: scale(1); }
+            50% { transform: scale(1.3); }
+        }
+
+        /* Empty State */
+        .empty-state {
+            text-align: center;
+            padding: 40px;
+            color: var(--text-dim);
+        }
+
+        .empty-icon {
+            font-size: 3rem;
+            margin-bottom: 15px;
+            opacity: 0.5;
+        }
+
+        /* Scrollbar */
+        ::-webkit-scrollbar {
+            width: 8px;
+        }
+
+        ::-webkit-scrollbar-track {
+            background: var(--bg);
+        }
+
+        ::-webkit-scrollbar-thumb {
+            background: var(--border);
+            border-radius: 4px;
+        }
+
+        ::-webkit-scrollbar-thumb:hover {
+            background: var(--profit);
+        }
+
+        /* Modal */
+        .modal-overlay {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: rgba(0,0,0,0.8);
+            z-index: 200;
+            align-items: center;
+            justify-content: center;
+            padding: 20px;
+        }
+
+        .modal-overlay.active {
+            display: flex;
+        }
+
+        .modal {
+            background: var(--bg-card);
+            border: 1px solid var(--border);
+            border-radius: 20px;
+            padding: 25px;
+            width: 100%;
+            max-width: 500px;
+            max-height: 90vh;
+            overflow-y: auto;
+            animation: modalIn 0.3s ease;
+        }
+
+        @keyframes modalIn {
+            from { transform: scale(0.9); opacity: 0; }
+            to { transform: scale(1); opacity: 1; }
+        }
+
+        .modal-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 20px;
+        }
+
+        .modal-title {
+            font-size: 1.3rem;
+            font-weight: 600;
+        }
+
+        .modal-close {
+            background: none;
+            border: none;
+            color: var(--text-dim);
+            font-size: 1.5rem;
+            cursor: pointer;
+        }
+
+        /* Responsive */
+        @media (min-width: 768px) {
+            .stats-grid {
+                grid-template-columns: repeat(4, 1fr);
+            }
+            
+            .strategy-grid {
+                grid-template-columns: repeat(2, 1fr);
+            }
+            
+            .nav-items {
+                gap: 20px;
+            }
+        }
+    </style>
+</head>
+<body>
+
+    <!-- Particles Background -->
+    <div class="particles" id="particles"></div>
+
+    <!-- Header -->
+    <header class="header">
+        <div class="header-content">
+            <div class="logo">
+                <div class="logo-icon">🧠</div>
+                <span class="logo-text">MyTradingBrain</span>
+            </div>
+            <div class="datetime">
+                <div id="currentDate">Loading...</div>
+                <div class="time" id="currentTime">00:00:00</div>
+            </div>
+        </div>
+    </header>
+
+    <!-- Main Content -->
+    <main class="main">
+
+        <!-- HOME PAGE -->
+        <div class="page active" id="page-home">
+            <h1 class="page-title">Dashboard</h1>
+            <p class="page-subtitle">আজকের ট্রেডিং স্ট্যাটাস</p>
+
+            <div class="stats-grid">
+                <div class="stat-card">
+                    <div class="stat-label">আজকের ট্রেড</div>
+                    <div class="stat-value" id="todayTrades">0</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-label">Win Rate</div>
+                    <div class="stat-value profit" id="todayWinRate">0%</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-label">প্রফিট/লস</div>
+                    <div class="stat-value" id="todayPnL">$0</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-label">মুড</div>
+                    <div class="stat-value" id="todayMood">😐</div>
+                </div>
+            </div>
+
+            <div class="card">
+                <div class="card-header">
+                    <div class="card-title">✅ আজকের চেকলিস্ট</div>
+                    <button class="btn btn-outline" onclick="resetChecklist()">রিসেট</button>
+                </div>
+                <div id="homeChecklist"></div>
+                <div class="progress-bar">
+                    <div class="progress-fill" id="checklistProgress" style="width: 0%"></div>
+                </div>
+            </div>
+
+            <div class="card">
+                <div class="card-header">
+                    <div class="card-title">📝 দ্রুত নোট</div>
+                </div>
+                <div class="form-group">
+                    <textarea class="form-textarea" id="quickNote" placeholder="আজকের লেসন লিখুন..."></textarea>
+                </div>
+                <button class="btn btn-primary" onclick="saveQuickNote()">💾 সেভ করুন</button>
+            </div>
+        </div>
+
+        <!-- STRATEGIES PAGE -->
+        <div class="page" id="page-strategies">
+            <h1 class="page-title">Strategies</h1>
+            <p class="page-subtitle">আপনার ট্রেডিং স্ট্র্যাটেজি লাইব্রেরি</p>
+
+            <button class="btn btn-primary" style="margin-bottom: 20px; width: 100%;" onclick="openModal('strategyModal')">
+                ➕ নতুন স্ট্র্যাটেজি যোগ করুন
+            </button>
+
+            <div class="strategy-grid" id="strategyList"></div>
+        </div>
+
+        <!-- CHECKLIST PAGE -->
+        <div class="page" id="page-checklist">
+            <h1 class="page-title">Checklist</h1>
+            <p class="page-subtitle">প্রতিটি ট্রেডের আগে চেক করুন</p>
+
+            <div class="card">
+                <div class="card-header">
+                    <div class="card-title">📋 PRE-TRADE চেকলিস্ট</div>
+                </div>
+                <div id="preTradeChecklist"></div>
+                <div class="progress-bar">
+                    <div class="progress-fill" id="preProgress" style="width: 0%"></div>
+                </div>
+            </div>
+
+            <div class="card">
+                <div class="card-header">
+                    <div class="card-title">🛑 STOP RULES</div>
+                </div>
+                <div id="stopRulesChecklist"></div>
+            </div>
+        </div>
+
+        <!-- PSYCHOLOGY PAGE -->
+        <div class="page" id="page-psychology">
+            <h1 class="page-title">Psychology</h1>
+            <p class="page-subtitle">মনস্তত্ত্ব = ৯০% সফলতা</p>
+
+            <div class="card">
+                <div class="card-header">
+                    <div class="card-title">😊 আজকের মুড</div>
+                </div>
+                <div class="mood-grid">
+                    <button class="mood-btn" onclick="setMood('😄')" title="খুব ভালো">😄</button>
+                    <button class="mood-btn" onclick="setMood('🙂')" title="ভালো">🙂</button>
+                    <button class="mood-btn" onclick="setMood('😐')" title="সাধারণ">😐</button>
+                    <button class="mood-btn" onclick="setMood('😰')" title="চিন্তিত">😰</button>
+                </div>
+                <p style="text-align: center; color: var(--text-dim);" id="moodText">আজকের মুড সিলেক্ট করুন</p>
+            </div>
+
+            <div class="card">
+                <div class="card-header">
+                    <div class="card-title">🫁 Breathing Exercise (4-7-8)</div>
+                </div>
+                <div class="breathing-circle" id="breathText">শ্বাস</div>
+                <p style="text-align: center; color: var(--text-dim);">
+                    ট্রেডের আগে ৩বার করুন<br>
+                    শ্বাস নিন → থামুন → ছাড়ুন
+                </p>
+            </div>
+
+            <div class="card">
+                <div class="card-header">
+                    <div class="card-title">📜 গোল্ডেন রুলস</div>
+                </div>
+                <div id="goldenRules"></div>
+            </div>
+        </div>
+
+        <!-- RESULTS PAGE -->
+        <div class="page" id="page-results">
+            <h1 class="page-title">Results</h1>
+            <p class="page-subtitle">ট্রেড হিস্ট্রি ট্র্যাকার</p>
+
+            <button class="btn btn-primary" style="margin-bottom: 20px; width: 100%;" onclick="openModal('tradeModal')">
+                ➕ নতুন ট্রেড যোগ করুন
+            </button>
+
+            <div class="stats-grid" style="margin-bottom: 20px;">
+                <div class="stat-card">
+                    <div class="stat-label">মোট ট্রেড</div>
+                    <div class="stat-value" id="totalTrades">0</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-label">মোট Win</div>
+                    <div class="stat-value profit" id="totalWins">0</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-label">মোট Loss</div>
+                    <div class="stat-value loss" id="totalLosses">0</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-label">Overall Win Rate</div>
+                    <div class="stat-value profit" id="overallWinRate">0%</div>
+                </div>
+            </div>
+
+            <div class="card">
+                <div class="card-header">
+                    <div class="card-title">📊 সাম্প্রতিক ট্রেডস</div>
+                </div>
+                <div class="trade-list" id="tradeList"></div>
+            </div>
+        </div>
+
+        <!-- NOTES PAGE -->
+        <div class="page" id="page-notes">
+            <h1 class="page-title">Notes</h1>
+            <p class="page-subtitle">আপনার ট্রেডিং নলেজ বেস</p>
+
+            <button class="btn btn-primary" style="margin-bottom: 20px; width: 100%;" onclick="openModal('noteModal')">
+                ➕ নতুন নোট যোগ করুন
+            </button>
+
+            <div id="notesList"></div>
+        </div>
+
+    </main>
+
+    <!-- Navigation -->
+    <nav class="nav">
+        <div class="nav-items">
+            <button class="nav-item active" onclick="showPage('home')">
+                <span class="nav-icon">🏠</span>
+                <span>Home</span>
+            </button>
+            <button class="nav-item" onclick="showPage('strategies')">
+                <span class="nav-icon">📊</span>
+                <span>Strategy</span>
+            </button>
+            <button class="nav-item" onclick="showPage('checklist')">
+                <span class="nav-icon">✅</span>
+                <span>Check</span>
+            </button>
+            <button class="nav-item" onclick="showPage('psychology')">
+                <span class="nav-icon">🧠</span>
+                <span>Mind</span>
+            </button>
+            <button class="nav-item" onclick="showPage('results')">
+                <span class="nav-icon">📈</span>
+                <span>Results</span>
+            </button>
+            <button class="nav-item" onclick="showPage('notes')">
+                <span class="nav-icon">📝</span>
+                <span>Notes</span>
+            </button>
+        </div>
+    </nav>
+
+    <!-- MODALS -->
+
+    <!-- Add Strategy Modal -->
+    <div class="modal-overlay" id="strategyModal">
+        <div class="modal">
+            <div class="modal-header">
+                <div class="modal-title">➕ নতুন স্ট্র্যাটেজি</div>
+                <button class="modal-close" onclick="closeModal('strategyModal')">✕</button>
+            </div>
+            <div class="form-group">
+                <label class="form-label">স্ট্র্যাটেজি নাম</label>
+                <input type="text" class="form-input" id="stratName" placeholder="যেমন: Trend Following">
+            </div>
+            <div class="form-group">
+                <label class="form-label">Win Rate (%)</label>
+                <input type="number" class="form-input" id="stratWinRate" placeholder="65">
+            </div>
+            <div class="form-group">
+                <label class="form-label">বেস্ট পেয়ার</label>
+                <input type="text" class="form-input" id="stratPair" placeholder="EUR/USD">
+            </div>
+            <div class="form-group">
+                <label class="form-label">বেস্ট টাইম</label>
+                <input type="text" class="form-input" id="stratTime" placeholder="London Session">
+            </div>
+            <div class="form-group">
+                <label class="form-label">বিস্তারিত</label>
+                <textarea class="form-textarea" id="stratDesc" placeholder="স্ট্র্যাটেজি ব্যাখ্যা..."></textarea>
+            </div>
+            <button class="btn btn-primary" onclick="addStrategy()" style="width: 100%;">✅ যোগ করুন</button>
+        </div>
+    </div>
+
+    <!-- Add Trade Modal -->
+    <div class="modal-overlay" id="tradeModal">
+        <div class="modal">
+            <div class="modal-header">
+                <div class="modal-title">➕ নতুন ট্রেড</div>
+                <button class="modal-close" onclick="closeModal('tradeModal')">✕</button>
+            </div>
+            <div class="form-group">
+                <label class="form-label">তারিখ</label>
+                <input type="date" class="form-input" id="tradeDate">
+            </div>
+            <div class="form-group">
+                <label class="form-label">পেয়ার</label>
+                <select class="form-select" id="tradePair">
+                    <option>EUR/USD</option>
+                    <option>GBP/USD</option>
+                    <option>USD/JPY</option>
+                    <option>AUD/USD</option>
+                    <option>USD/CAD</option>
+                </select>
+            </div>
+            <div class="form-group">
+                <label class="form-label">দিক</label>
+                <select class="form-select" id="tradeDirection">
+                    <option value="UP">📈 UP (Call)</option>
+                    <option value="DOWN">📉 DOWN (Put)</option>
+                </select>
+            </div>
+            <div class="form-group">
+                <label class="form-label">রেজাল্ট</label>
+                <select class="form-select" id="tradeResult">
+                    <option value="win">✅ Win</option>
+                    <option value="loss">❌ Loss</option>
+                </select>
+            </div>
+            <div class="form-group">
+                <label class="form-label">ট্রেড সাইজ ($)</label>
+                <input type="number" class="form-input" id="tradeAmount" placeholder="10">
+            </div>
+            <div class="form-group">
+                <label class="form-label">P/L ($)</label>
+                <input type="number" class="form-input" id="tradePnL" placeholder="9.5">
+            </div>
+            <button class="btn btn-primary" onclick="addTrade()" style="width: 100%;">✅ যোগ করুন</button>
+        </div>
+    </div>
+
+    <!-- Add Note Modal -->
+    <div class="modal-overlay" id="noteModal">
+        <div class="modal">
+            <div class="modal-header">
+                <div class="modal-title">➕ নতুন নোট</div>
+                <button class="modal-close" onclick="closeModal('noteModal')">✕</button>
+            </div>
+            <div class="form-group">
+                <label class="form-label">টাইটেল</label>
+                <input type="text" class="form-input" id="noteTitle" placeholder="নোটের শিরোনাম">
+            </div>
+            <div class="form-group">
+                <label class="form-label">ট্যাগ</label>
+                <select class="form-select" id="noteTag">
+                    <option>Strategy</option>
+                    <option>Psychology</option>
+                    <option>Risk Management</option>
+                    <option>Market Analysis</option>
+                    <option>Lesson Learned</option>
+                </select>
+            </div>
+            <div class="form-group">
+                <label class="form-label">নোট</label>
+                <textarea class="form-textarea" id="noteContent" placeholder="আপনার নোট লিখুন..."></textarea>
+            </div>
+            <button class="btn btn-primary" onclick="addNote()" style="width: 100%;">✅ যোগ করুন</button>
+        </div>
+    </div>
+
+    <script>
+        // ============ DATA STORAGE ============
+        const Storage = {
+            get(key) {
+                const data = localStorage.getItem(key);
+                return data ? JSON.parse(data) : null;
+            },
+            set(key, value) {
+                localStorage.setItem(key, JSON.stringify(value));
+            }
+        };
+
+        // ============ INITIAL DATA ============
+        const defaultStrategies = [
+            {
+                id: 1,
+                name: "Trend Following",
+                winRate: 65,
+                pair: "EUR/USD",
+                time: "London Session",
+                desc: "ট্রেন্ডের দিকেই ট্রেড করুন। ৫M ট্রেন্ড চেক করুন, ১৫S-এ এন্ট্রি দিন।"
+            },
+            {
+                id: 2,
+                name: "Support/Resistance Bounce",
+                winRate: 60,
+                pair: "EUR/USD",
+                time: "Any Session",
+                desc: "S/R লেভেলে প্রাইস আসলে বাউন্স ট্রেড। ২-৩বার টাচ হওয়া লেভেল বেস্ট।"
+            },
+            {
+                id: 3,
+                name: "RSI Divergence",
+                winRate: 55,
+                pair: "GBP/USD",
+                time: "NY Session",
+                desc: "RSI < 30 = Oversold (UP), RSI > 70 = Overbought (DOWN)"
+            },
+            {
+                id: 4,
+                name: "Breakout + Retest",
+                winRate: 70,
+                pair: "EUR/USD",
+                time: "London Open",
+                desc: "রেঞ্জ ব্রেক করার পর রিটেস্টে এন্ট্রি। সবচেয়ে শক্তিশালী সেটআপ।"
+            }
+        ];
+
+        const defaultChecklist = [
+            "৫M ট্রেন্ড চেক করেছি?",
+            "১M সেটআপ কনফার্মড?",
+            "S/R লেভেল চিহ্নিত?",
+            "RSI সাপোর্ট করে?",
+            "ক্যান্ডেল প্যাটার্ন আছে?",
+            "নিউজ টাইম নয়?",
+            "রিস্ক ২% বেশি নয়?",
+            "আজ ৩টির বেশি লস হয়নি?",
+            "মন শান্ত?",
+            "জার্নাল রেডি?"
+        ];
+
+        const stopRules = [
+            "৩টি কনসেকিউটিভ লস = STOP",
+            "৫% ডেইলি প্রফিট = STOP",
+            "৩% ডেইলি লস = STOP",
+            "রাগ/ফিয়ার ফিল করলে = STOP",
+            "রাত ১০টার পর = STOP"
+        ];
+
+        const goldenRules = [
+            "৬০% Win Rate = প্রফিটেবল",
+            "প্রতি ট্রেড ২% ম্যাক্স রিস্ক",
+            "ট্রেন্ডের বিপরীতে কখনো ট্রেড নয়",
+            "সাইডওয়েজ মার্কেটে NO TRADE",
+            "লস হলে রিভেঞ্জ ট্রেড নয়",
+            "প্রফিট হলে গ্রিডি হবেন না",
+            "জার্নাল না লিখলে ট্রেড নয়"
+        ];
+
+        // ============ INIT ============
+        function init() {
+            // Create particles
+            const particlesContainer = document.getElementById('particles');
+            for (let i = 0; i < 30; i++) {
+                const p = document.createElement('div');
+                p.className = 'particle';
+                p.style.left = Math.random() * 100 + '%';
+                p.style.animationDelay = Math.random() * 15 + 's';
+                p.style.animationDuration = (10 + Math.random() * 10) + 's';
+                particlesContainer.appendChild(p);
+            }
+
+            // Init data
+            if (!Storage.get('strategies')) {
+                Storage.set('strategies', defaultStrategies);
+            }
+            if (!Storage.get('trades')) {
+                Storage.set('trades', []);
+            }
+            if (!Storage.get('notes')) {
+                Storage.set('notes', []);
+            }
+            if (!Storage.get('checklist')) {
+                Storage.set('checklist', new Array(defaultChecklist.length).fill(false));
+            }
+            if (!Storage.get('mood')) {
+                Storage.set('mood', '😐');
+            }
+
+            // Set today's date in trade modal
+            document.getElementById('tradeDate').valueAsDate = new Date();
+
+            renderAll();
+            startClock();
+        }
+
+        // ============ CLOCK ============
+        function startClock() {
+            function update() {
+                const now = new Date();
+                const options = { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' };
+                document.getElementById('currentDate').textContent = now.toLocaleDateString('bn-BD', options);
+                document.getElementById('currentTime').textContent = now.toLocaleTimeString('bn-BD');
+            }
+            update();
+            setInterval(update, 1000);
+        }
+
+        // ============ NAVIGATION ============
+        function showPage(pageName) {
+            document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
+            document.querySelectorAll('.nav-item').forEach(n => n.classList.remove('active'));
+            
+            document.getElementById('page-' + pageName).classList.add('active');
+            event.currentTarget.classList.add('active');
+            
+            renderAll();
+        }
+
+        // ============ RENDER ALL ============
+        function renderAll() {
+            renderHome();
+            renderStrategies();
+            renderChecklist();
+            renderPsychology();
+            renderResults();
+            renderNotes();
+        }
+
+        // ============ HOME ============
+        function renderHome() {
+            const trades = Storage.get('trades') || [];
+            const today = new Date().toISOString().split('T')[0];
+            const todayTrades = trades.filter(t => t.date === today);
+            
+            const wins = todayTrades.filter(t => t.result === 'win').length;
+            const total = todayTrades.length;
+            const winRate = total > 0 ? Math.round((wins / total) * 100) : 0;
+            
+            let pnl = 0;
+            todayTrades.forEach(t => {
+                pnl += parseFloat(t.pnl) || 0;
+            });
+
+            document.getElementById('todayTrades').textContent = total;
+            document.getElementById('todayWinRate').textContent = winRate + '%';
+            document.getElementById('todayWinRate').className = 'stat-value ' + (winRate >= 50 ? 'profit' : 'loss');
+            document.getElementById('todayPnL').textContent = (pnl >= 0 ? '+' : '') + '$' + pnl.toFixed(2);
+            document.getElementById('todayPnL').className = 'stat-value ' + (pnl >= 0 ? 'profit' : 'loss');
+            document.getElementById('todayMood').textContent = Storage.get('mood') || '😐';
+
+            // Checklist
+            const checklist = Storage.get('checklist') || new Array(defaultChecklist.length).fill(false);
+            let html = '';
+            checklist.forEach((checked, i) => {
+                html += `
+                    <div class="checklist-item ${checked ? 'checked' : ''}" onclick="toggleChecklist(${i})">
+                        <div class="checkbox">${checked ? '✓' : ''}</div>
+                        <div class="check-text">${defaultChecklist[i]}</div>
+                    </div>
+                `;
+            });
+            document.getElementById('homeChecklist').innerHTML = html;
+
+            const progress = checklist.filter(c => c).length / checklist.length * 100;
+            document.getElementById('checklistProgress').style.width = progress + '%';
+        }
+
+        function toggleChecklist(index) {
+            const checklist = Storage.get('checklist') || new Array(defaultChecklist.length).fill(false);
+            checklist[index] = !checklist[index];
+            Storage.set('checklist', checklist);
+            renderHome();
+            renderChecklist();
+        }
+
+        function resetChecklist() {
+            Storage.set('checklist', new Array(defaultChecklist.length).fill(false));
+            renderHome();
+            renderChecklist();
+        }
+
+        function saveQuickNote() {
+            const content = document.getElementById('quickNote').value;
+            if (!content.trim()) return;
+            
+            const notes = Storage.get('notes') || [];
+            notes.unshift({
+                id: Date.now(),
+                title: 'Quick Note - ' + new Date().toLocaleDateString('bn-BD'),
+                tag: 'Quick',
+                content: content,
+                date: new Date().toISOString()
+            });
+            Storage.set('notes', notes);
+            document.getElementById('quickNote').value = '';
+            alert('✅ নোট সেভ হয়েছে!');
+            renderNotes();
+        }
+
+        // ============ STRATEGIES ============
+        function renderStrategies() {
+            const strategies = Storage.get('strategies') || [];
+            let html = '';
+            strategies.forEach(s => {
+                html += `
+                    <div class="strategy-card" onclick="alert('${s.desc.replace(/'/g, "\\'")}')">
+                        <div class="strategy-header">
+                            <div class="strategy-name">${s.name}</div>
+                            <div class="win-badge">${s.winRate}% WR</div>
+                        </div>
+                        <div class="strategy-meta">
+                            <span>📊 ${s.pair}</span>
+                            <span>⏰ ${s.time}</span>
+                        </div>
+                        <div class="strategy-desc">${s.desc}</div>
+                    </div>
+                `;
+            });
+            document.getElementById('strategyList').innerHTML = html;
+        }
+
+        function addStrategy() {
+            const name = document.getElementById('stratName').value;
+            const winRate = document.getElementById('stratWinRate').value;
+            const pair = document.getElementById('stratPair').value;
+            const time = document.getElementById('stratTime').value;
+            const desc = document.getElementById('stratDesc').value;
+
+            if (!name) return alert('নাম দিন!');
+
+            const strategies = Storage.get('strategies') || [];
+            strategies.push({
+                id: Date.now(),
+                name, winRate: parseInt(winRate) || 0, pair, time, desc
+            });
+            Storage.set('strategies', strategies);
+
+            closeModal('strategyModal');
+            document.getElementById('stratName').value = '';
+            document.getElementById('stratWinRate').value = '';
+            document.getElementById('stratPair').value = '';
+            document.getElementById('stratTime').value = '';
+            document.getElementById('stratDesc').value = '';
+            renderStrategies();
+        }
+
+        // ============ CHECKLIST ============
+        function renderChecklist() {
+            const checklist = Storage.get('checklist') || new Array(defaultChecklist.length).fill(false);
+            
+            let preHtml = '';
+            checklist.forEach((checked, i) => {
+                preHtml += `
+                    <div class="checklist-item ${checked ? 'checked' : ''}" onclick="toggleChecklist(${i})">
+                        <div class="checkbox">${checked ? '✓' : ''}</div>
+                        <div class="check-text">${defaultChecklist[i]}</div>
+                    </div>
+                `;
+            });
+            document.getElementById('preTradeChecklist').innerHTML = preHtml;
+
+            const preProgress = checklist.filter(c => c).length / checklist.length * 100;
+            document.getElementById('preProgress').style.width = preProgress + '%';
+
+            let stopHtml = '';
+            stopRules.forEach(rule => {
+                stopHtml += `
+                    <div class="checklist-item" style="cursor: default;">
+                        <div class="checkbox" style="border-color: var(--loss);">!</div>
+                        <div class="check-text" style="color: var(--loss);">${rule}</div>
+                    </div>
+                `;
+            });
+            document.getElementById('stopRulesChecklist').innerHTML = stopHtml;
+        }
+
+        // ============ PSYCHOLOGY ============
+        function renderPsychology() {
+            const mood = Storage.get('mood') || '😐';
+            document.querySelectorAll('.mood-btn').forEach(btn => {
+                btn.classList.toggle('active', btn.textContent === mood);
+            });
+            document.getElementById('moodText').textContent = 
+                mood === '😄' ? 'খুব ভালো! ট্রেড করুন' :
+                mood === '🙂' ? 'ভালো। সতর্ক থাকুন' :
+                mood === '😐' ? 'সাধারণ। ছোট ট্রেড করুন' :
+                'চিন্তিত! আজ NO TRADE ভালো';
+
+            let rulesHtml = '';
+            goldenRules.forEach(rule => {
+                rulesHtml += `
+                    <div class="checklist-item" style="cursor: default;">
+                        <div class="checkbox" style="border-color: var(--profit);">★</div>
+                        <div class="check-text">${rule}</div>
+                    </div>
+                `;
+            });
+            document.getElementById('goldenRules').innerHTML = rulesHtml;
+        }
+
+        function setMood(mood) {
+            Storage.set('mood', mood);
+            renderPsychology();
+            renderHome();
+        }
+
+        // ============ RESULTS ============
+        function renderResults() {
+            const trades = Storage.get('trades') || [];
+            const total = trades.length;
+            const wins = trades.filter(t => t.result === 'win').length;
+            const losses = trades.filter(t => t.result === 'loss').length;
+            const winRate = total > 0 ? Math.round((wins / total) * 100) : 0;
+
+            document.getElementById('totalTrades').textContent = total;
+            document.getElementById('totalWins').textContent = wins;
+            document.getElementById('totalLosses').textContent = losses;
+            document.getElementById('overallWinRate').textContent = winRate + '%';
+
+            let html = '';
+            trades.slice().reverse().slice(0, 20).forEach(t => {
+                const isWin = t.result === 'win';
+                html += `
+                    <div class="trade-item ${isWin ? 'win' : 'loss'}">
+                        <div class="trade-info">
+                            <div class="trade-pair">${t.pair} ${t.direction === 'UP' ? '📈' : '📉'}</div>
+                            <div class="trade-date">${t.date} | $${t.amount}</div>
+                        </div>
+                        <div class="trade-result">
+                            <div class="trade-pnl ${isWin ? 'win' : 'loss'}">
+                                ${isWin ? '+' : ''}$${t.pnl}
+                            </div>
+                            <div style="font-size: 0.8rem; color: var(--text-dim);">
+                                ${isWin ? '✅ Win' : '❌ Loss'}
+                            </div>
+                        </div>
+                    </div>
+                `;
+            });
+            
+            if (trades.length === 0) {
+                html = `
+                    <div class="empty-state">
+                        <div class="empty-icon">📊</div>
+                        <p>কোনো ট্রেড যোগ করা হয়নি</p>
+                    </div>
+                `;
+            }
+            document.getElementById('tradeList').innerHTML = html;
+        }
+
+        function addTrade() {
+            const date = document.getElementById('tradeDate').value;
+            const pair = document.getElementById('tradePair').value;
+            const direction = document.getElementById('tradeDirection').value;
+            const result = document.getElementById('tradeResult').value;
+            const amount = document.getElementById('tradeAmount').value;
+            const pnl = document.getElementById('tradePnL').value;
+
+            if (!date || !amount) return alert('সব ফিল্ড পূরণ করুন!');
+
+            const trades = Storage.get('trades') || [];
+            trades.push({
+                id: Date.now(),
+                date, pair, direction, result,
+                amount: parseFloat(amount),
+                pnl: parseFloat(pnl) || 0
+            });
+            Storage.set('trades', trades);
+
+            closeModal('tradeModal');
+            document.getElementById('tradeAmount').value = '';
+            document.getElementById('tradePnL').value = '';
+            renderResults();
+            renderHome();
+        }
+
+        // ============ NOTES ============
+        function renderNotes() {
+            const notes = Storage.get('notes') || [];
+            let html = '';
+            notes.forEach(n => {
+                html += `
+                    <div class="note-card">
+                        <div class="note-header">
+                            <div class="note-title">${n.title}</div>
+                            <div class="note-tag">${n.tag}</div>
+                        </div>
+                        <div class="note-content">${n.content}</div>
+                        <div class="note-date">${new Date(n.date).toLocaleDateString('bn-BD')}</div>
+                    </div>
+                `;
+            });
+            
+            if (notes.length === 0) {
+                html = `
+                    <div class="empty-state">
+                        <div class="empty-icon">📝</div>
+                        <p>কোনো নোট যোগ করা হয়নি</p>
+                    </div>
+                `;
+            }
+            document.getElementById('notesList').innerHTML = html;
+        }
+
+        function addNote() {
+            const title = document.getElementById('noteTitle').value;
+            const tag = document.getElementById('noteTag').value;
+            const content = document.getElementById('noteContent').value;
+
+            if (!title || !content) return alert('টাইটেল ও নোট লিখুন!');
+
+            const notes = Storage.get('notes') || [];
+            notes.unshift({
+                id: Date.now(),
+                title, tag, content,
+                date: new Date().toISOString()
+            });
+            Storage.set('notes', notes);
+
+            closeModal('noteModal');
+            document.getElementById('noteTitle').value = '';
+            document.getElementById('noteContent').value = '';
+            renderNotes();
+        }
+
+        // ============ MODALS ============
+        function openModal(id) {
+            document.getElementById(id).classList.add('active');
+        }
+
+        function closeModal(id) {
+            document.getElementById(id).classList.remove('active');
+        }
+
+        // Close modal on outside click
+        document.querySelectorAll('.modal-overlay').forEach(overlay => {
+            overlay.addEventListener('click', (e) => {
+                if (e.target === overlay) overlay.classList.remove('active');
+            });
+        });
+
+        // ============ START ============
+        init();
+    </script>
+</body>
+</html>
